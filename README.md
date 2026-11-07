@@ -28,15 +28,8 @@ ssh pi@jed.local 'findmnt /mnt/ssd; docker ps; systemctl --failed; vcgencmd get_
 ```
 `throttled=0x0` is good, anything else = undervoltage/overheating.
 ## Watchdog
-Reboots the Pi automatically if it freezes.
-``` bash
-sudo nano /etc/systemd/system.conf
-```
-Uncomment and edit:
-```
-RuntimeWatchdogSec=15
-```
-Apply with `sudo systemctl daemon-reexec` (or reboot). Check: `systemctl show -p RuntimeWatchdogUSec`
+Reboots the Pi automatically if it freezes. On by default in Raspberry Pi OS (`RuntimeWatchdogSec=1m` in `/usr/lib/systemd/system.conf.d/40-rpi-enable-watchdog.conf`). This drop-in overrides `/etc/systemd/system.conf`, so editing that file has no effect.
+Check: `systemctl show -p RuntimeWatchdogUSec`
 ## Persistent logs
 Raspberry Pi OS keeps logs in RAM only (`Storage=volatile` in `/usr/lib/systemd/journald.conf.d/40-rpi-volatile-storage.conf`), so they are lost on reboot. Override it:
 ``` bash
@@ -56,9 +49,8 @@ sudo ntfsfix -d /dev/sda2 && sudo mount /mnt/ssd
 sudo systemctl reset-failed docker.socket docker.service && sudo systemctl start docker
 ```
 - Suspect: the SSD enclosure, it also dropped off USB on the PC on 2026-10-03
-- Added watchdog and persistent logs (see above)
+- Added persistent logs (see above)
 ## TODO
-- [x] Watchdog
 - [x] Persistent logs
 - [ ] `chkdsk /f` on the SSD from Windows (ntfsfix found `$MFTMirr` damage), or move it to ext4
 - [ ] Check `vcgencmd get_throttled` in a few days
